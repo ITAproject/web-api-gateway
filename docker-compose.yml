@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  web-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - DISCOUNT_SERVICE_URL=http://backend_discounts:9000
+      - PRODUCT_SERVICE_URL=http://backend_products:8081/products
+      - NOTIFICATION_SERVICE_URL=http://backend_notifications/notifications
+    networks:
+      - network
+networks:
+  network:
