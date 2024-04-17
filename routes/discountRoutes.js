@@ -1,6 +1,9 @@
 const express = require('express');
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const env = require('dotenv');
+
+env.config();
 
 const app = express();
 const router = express.Router();
@@ -8,7 +11,7 @@ const router = express.Router();
 const currentDirectory = process.cwd();
 
 const packageDefinition = protoLoader.loadSync(
-    currentDirectory + '/grpc/discount.proto',
+     currentDirectory + '/grpc/discount.proto',
     {
         keepCase: true,
         longs: String,
