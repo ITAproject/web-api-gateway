@@ -1,17 +1,115 @@
 version: '3'
 
 services:
-  web-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  artemis:
+    image: quay.io/artemiscloud/activemq-artemis-broker:1.0.25
+    container_name: artemis
+    ports:
+      - "8161:8161"
+      - "61616:61616"
+      - "5672:5672"
+    environment:
+      - AMQ_USER=quarkus
+      - AMQ_PASSWORD=quarkus
+    networks:
+      - ita_network
+
+  mongo_notifications:
+    image: mongo:4.0.4
+    container_name: mongo_notifications
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ./data:/data/db_data
+    networks:
+      - ita_network
+
+  mongo_products:
+    image: mongo:4.0.4
+    container_name: mongo_products
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - ./data:/data/db_data_products
+    networks:
+      - ita_network
+
+  mongo_discounts:
+      image: mongo:4.0.4
+      container_name: mongo_discounts
+      ports:
+        - "27019:27017"
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: root
+      volumes:
+        - ./data:/data/db_data_discount
+      networks:
+        - ita_network
+
+  notification-service:
+    image: jernejofic444/notification-service
+    ports:
+      - "8080:8080"
+    environment:
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://root:root@mongo_notifications:27017
+      - QUARKUS_MONGODB_DATABASE=notifications
+      - QUARKUS_ARTEMIS_URL=tcp://artemis:61616
+      - QUARKUS_ARTEMIS_USERNAME=quarkus
+      - QUARKUS_ARTEMIS_PASSWORD=quarkus
+    depends_on:
+      - mongo_notifications
+      - artemis
+    networks:
+      - ita_network
+
+  product-service:
+    image: jernejofic444/product-service
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongo_products:27017
+      - SPRING_DATA_MONGODB_DATABASE=products
+    depends_on:
+      - mongo_products
+    networks:
+      - ita_network
+
+  discount-service:
+    image: jernejofic444/discount-service
+    ports:
+      - "9000:9000"
+    environment:
+      - QUARKUS_MONGODB_CONNECTION_STRING=mongodb://root:root@mongo_discounts:27017
+      - QUARKUS_MONGODB_DATABASE=discounts
+    depends_on:
+      - mongo_discounts
+    networks:
+      - ita_network
+
+  web-api-gateway:
+    image: jernejofic444/web-api-gateway
     ports:
       - "3003:3003"
     environment:
-      - DISCOUNT_SERVICE_URL=http://backend_discounts:9000
-      - PRODUCT_SERVICE_URL=http://backend_products:8081/products
-      - NOTIFICATION_SERVICE_URL=http://backend_notifications/notifications
+      - DISCOUNT_SERVICE_URL=discount-service:9000
+      - PRODUCT_SERVICE_URL=http://product-service:8081/products
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8080/notifications
+    depends_on:
+      - notification-service
+      - product-service
+      - discount-service
     networks:
-      - network
+      - ita_network
+
+
+
 networks:
-  network:
+  ita_network:
+    driver: bridge
