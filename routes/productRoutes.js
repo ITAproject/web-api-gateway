@@ -10,6 +10,7 @@ router.get('/', async (req, res) => {
         const response = await axios.get(BASE_URL);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Product service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: error.message });
     }
 });
@@ -21,6 +22,7 @@ router.get('/:productId', async (req, res) => {
         const response = await axios.get(`${BASE_URL}/${productId}`);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Product service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -32,6 +34,7 @@ router.post('/', async (req, res) => {
         const response = await axios.post(BASE_URL, product);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Product service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -44,6 +47,7 @@ router.put('/:productId', async (req, res) => {
         const response = await axios.put(`${BASE_URL}/${productId}`, updatedProduct);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Product service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -55,6 +59,7 @@ router.delete('/:productId', async (req, res) => {
         await axios.delete(`${BASE_URL}/${productId}`);
         res.status(204).send();
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Product service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

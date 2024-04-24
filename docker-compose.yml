@@ -99,7 +99,7 @@ services:
       - "3003:3003"
     environment:
       - DISCOUNT_SERVICE_URL=discount-service:9000
-      - PRODUCT_SERVICE_URL=http://product-service:8081/products
+      - PRODUCT_SERVICE_URL=http://product-service:8080/products
       - NOTIFICATION_SERVICE_URL=http://notification-service:8080/notifications
     depends_on:
       - notification-service

@@ -10,6 +10,7 @@ router.post('/', async (req, res) => {
         const response = await axios.post(BASE_URL, req.body);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -20,6 +21,7 @@ router.get('/', async (req, res) => {
         const response = await axios.get(BASE_URL);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -30,6 +32,7 @@ router.get('/jms', async (req, res) => {
         const response = await axios.get('http://localhost:8080/jms/notifications');
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -41,6 +44,7 @@ router.get('/:id', async (req, res) => {
         const response = await axios.get(`${BASE_URL}/${id}`);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -52,6 +56,7 @@ router.put('/:id', async (req, res) => {
         const response = await axios.put(`${BASE_URL}/${id}`, req.body);
         res.json(response.data);
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
@@ -63,6 +68,7 @@ router.delete('/:id', async (req, res) => {
         await axios.delete(`${BASE_URL}/${id}`);
         res.status(204).send();
     } catch (error) {
+        await axios.post(process.env.TRACKING_SERVICE_URL, { exception: `[Notification service] ${req.method} - ${req.url}: ${error.message}` });
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
